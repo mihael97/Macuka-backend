@@ -1,0 +1,10 @@
+db:
+  image: postgres
+  ports:
+    - "5432:5432"
+  environment:
+    - POSTGRES_USER=user
+    - POSTGRES_PASSWORD=password
+    - POSTGRES_DB=database
+  volumes:
+    - ./postgres-data:/var/lib/postgresql/data-macuka-backend
