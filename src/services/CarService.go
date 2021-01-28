@@ -24,14 +24,21 @@ func GetCars(idStr string) (interface{}, error) {
 	db := database.GetDatabase()
 	var cars []models.Car
 	if len(idStr) == 0 {
-		db.Find(&cars)
-		return cars, nil
+		db.Raw("SELECT * FROM cars").Find(&cars)
+		returnCars := make([]models.Car, 0)
+		for _, car := range cars {
+			db.Raw("SELECT * FROM trips WHERE car=?", car.Id).Find(&car.Trips)
+			returnCars = append(returnCars, car)
+		}
+
+		return returnCars, nil
 	} else {
 		id, err := strconv.ParseInt(idStr, 10, 32)
 		if err != nil {
 			return nil, err
 		}
 		db.Find(&cars, id)
+		db.Raw("SELECT * FROM trips WHERE car=?", cars[0].Id).Find(&cars[0].Trips)
 		return cars[0], nil
 	}
 }

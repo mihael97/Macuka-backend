@@ -6,6 +6,11 @@ import (
 	"macuka-backend/src/database"
 	"macuka-backend/src/models"
 	"strconv"
+	"time"
+)
+
+const (
+	DateFormat = "2006-01-02"
 )
 
 func CreateTrip(tripDto models.TripDto) (*models.Trip, error) {
@@ -24,11 +29,16 @@ func CreateTrip(tripDto models.TripDto) (*models.Trip, error) {
 	if len(cars) == 0 {
 		return nil, errors.New(fmt.Sprintf("%s car doesn't exist", tripDto.Car))
 	}
+	date, err := time.Parse(DateFormat, tripDto.Date)
+	if err != nil {
+		return nil, err
+	}
 	trip := models.Trip{
 		Path:  tripDto.ConnectPath(),
 		Start: uint(start),
 		End:   uint(end),
 		Car:   uint(carId),
+		Date:  date,
 	}
 	db.Create(&trip)
 	err = db.Model(&cars[0]).Association("Trips").Append([]models.Trip{trip})
@@ -36,4 +46,38 @@ func CreateTrip(tripDto models.TripDto) (*models.Trip, error) {
 		return nil, err
 	}
 	return &trip, nil
+}
+
+func GetTrips(idStr string, from string, to string) (interface{}, error) {
+	db := database.GetDatabase()
+	var err error
+	fromDate, err := time.Parse(DateFormat, time.Time{}.Format(DateFormat))
+	if err != nil {
+		return nil, err
+	}
+	toDate, err := time.Parse(DateFormat, time.Now().Format(DateFormat))
+	if len(from) != 0 {
+		fromDate, err = time.Parse(DateFormat, from)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if len(to) != 0 {
+		toDate, err = time.Parse(DateFormat, to)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if len(idStr) == 0 {
+		var trips []models.Trip
+		db.Where("date>=? AND date<=?", fromDate, toDate).Find(&trips)
+		return trips, nil
+	}
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	var trips []models.Trip
+	db.Where("date>=? AND date<=? AND id=?", fromDate, toDate, id).Find(&trips)
+	return trips[0], nil
 }
