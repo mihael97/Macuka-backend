@@ -5,8 +5,9 @@ import "fmt"
 type HttpMethod string
 
 const (
-	GetMethod  HttpMethod = "GET"
-	PostMethod HttpMethod = "POST"
+	GetMethod    HttpMethod = "GET"
+	PostMethod   HttpMethod = "POST"
+	DeleteMethod HttpMethod = "DELETE"
 )
 
 type PathMethodPair struct {

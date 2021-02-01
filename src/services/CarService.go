@@ -6,15 +6,32 @@ import (
 	"strconv"
 )
 
+func DeleteCar(id string) error {
+	idValue, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return err
+	}
+	db := database.GetDatabase()
+	db.Exec("DELETE FROM trips WHERE car=?", uint(idValue))
+	db.Exec("DELETE FROM cars WHERE id=?", uint(idValue))
+	return nil
+}
+
 func CreateCar(params map[string]string) (*models.Car, error) {
 	db := database.GetDatabase()
 	miles, err := strconv.ParseInt(params["miles"], 10, 32)
 	if err != nil {
 		return nil, err
 	}
+	year, err := strconv.ParseUint(params["miles"], 10, 32)
+	if err != nil {
+		return nil, err
+	}
 	car := models.Car{
+		Name:              params["name"],
 		Miles:             miles,
-		RegistrationPlate: params["registration"],
+		RegistrationPlate: params["registrationPlate"],
+		Year:              uint(year),
 	}
 	db.Create(&car)
 	return &car, nil
