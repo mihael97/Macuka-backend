@@ -42,6 +42,8 @@ func CreateTrip(tripDto models.TripDto) (*models.Trip, error) {
 	}
 	db.Create(&trip)
 	err = db.Model(&cars[0]).Association("Trips").Append([]models.Trip{trip})
+	cars[0].Miles = uint(end)
+	db.Save(&cars[0])
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +72,11 @@ func GetTrips(idStr string, from string, to string) (interface{}, error) {
 	}
 	if len(idStr) == 0 {
 		var trips []models.Trip
-		db.Where("date>=? AND date<=?", fromDate, toDate).Find(&trips)
+		if len(to) == 0 {
+			db.Where("date>=?", fromDate).Find(&trips)
+		} else {
+			db.Where("date>=? AND date<=?", fromDate, toDate).Find(&trips)
+		}
 		return trips, nil
 	}
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -78,6 +84,10 @@ func GetTrips(idStr string, from string, to string) (interface{}, error) {
 		return nil, err
 	}
 	var trips []models.Trip
-	db.Where("date>=? AND date<=? AND id=?", fromDate, toDate, id).Find(&trips)
+	if len(to) == 0 {
+		db.Where("date>=? AND id=?", fromDate, id).Find(&trips)
+	} else {
+		db.Where("date>=? AND date<=? AND id=?", fromDate, toDate, id).Find(&trips)
+	}
 	return trips[0], nil
 }

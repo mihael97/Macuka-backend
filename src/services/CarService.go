@@ -19,17 +19,17 @@ func DeleteCar(id string) error {
 
 func CreateCar(params map[string]string) (*models.Car, error) {
 	db := database.GetDatabase()
-	miles, err := strconv.ParseInt(params["miles"], 10, 32)
+	miles, err := strconv.ParseUint(params["miles"], 10, 32)
 	if err != nil {
 		return nil, err
 	}
-	year, err := strconv.ParseUint(params["miles"], 10, 32)
+	year, err := strconv.ParseUint(params["productionYear"], 10, 32)
 	if err != nil {
 		return nil, err
 	}
 	car := models.Car{
 		Name:              params["name"],
-		Miles:             miles,
+		Miles:             uint(miles),
 		RegistrationPlate: params["registrationPlate"],
 		Year:              uint(year),
 	}
