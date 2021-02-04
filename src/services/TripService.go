@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"macuka-backend/src/database"
+	"macuka-backend/src/dto"
 	"macuka-backend/src/models"
 	"strconv"
 	"time"
@@ -13,7 +14,7 @@ const (
 	DateFormat = "2006-01-02"
 )
 
-func CreateTrip(tripDto models.TripDto) (*models.Trip, error) {
+func CreateTrip(tripDto dto.TripDto) (*models.Trip, error) {
 	start, err := strconv.ParseUint(tripDto.Start, 10, 32)
 	if err != nil {
 		return nil, nil

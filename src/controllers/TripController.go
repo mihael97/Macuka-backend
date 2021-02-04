@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"gitlab.com/mihael97/go-utility/src/web"
-	"macuka-backend/src/models"
+	"macuka-backend/src/dto"
 	"macuka-backend/src/services"
 	"net/http"
 )
@@ -36,7 +36,7 @@ func getTrips(writer http.ResponseWriter, request *http.Request) {
 }
 
 func createTrip(writer http.ResponseWriter, request *http.Request) {
-	var decoded models.TripDto
+	var decoded dto.TripDto
 	err := json.NewDecoder(request.Body).Decode(&decoded)
 	if err != nil {
 		web.WriteError(err, writer)
