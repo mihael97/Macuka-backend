@@ -6,6 +6,6 @@ type Customer struct {
 	Iban          string `json:"iban" ;gorm:"unique"`
 	AccountNumber string `json:"account"`
 	Address       string `json:"address"`
-	PostalNumber  uint   `json:"postal_number"`
+	PostalNumber  uint   `json:"postalNumber"`
 	City          string `json:"city"`
 }

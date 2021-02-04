@@ -20,6 +20,9 @@ func main() {
 	for pathMethodPair, function := range controllers.GetCustomerRoutes() {
 		r.HandleFunc(pathMethodPair.Path, function).Methods(pathMethodPair.GetMethod())
 	}
+	for pathMethodPair, function := range controllers.GetCityRoutes() {
+		r.HandleFunc(pathMethodPair.Path, function).Methods(pathMethodPair.GetMethod())
+	}
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8080", nil))

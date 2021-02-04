@@ -13,6 +13,10 @@ func GetCustomerRoutes() map[PathMethodPair]func(http.ResponseWriter, *http.Requ
 	routes := make(map[PathMethodPair]func(http.ResponseWriter, *http.Request))
 
 	routes[PathMethodPair{
+		Path:   "/customers",
+		Method: GetMethod,
+	}] = getCustomers
+	routes[PathMethodPair{
 		Path:   "/customers/{type}",
 		Method: GetMethod,
 	}] = getCustomers
@@ -37,7 +41,7 @@ func createCustomer(writer http.ResponseWriter, request *http.Request) {
 
 func getCustomers(writer http.ResponseWriter, request *http.Request) {
 	params := mux.Vars(request)
-	if len(params["type"]) == 0 {
+	if params["type"] != "pairs" {
 		web.ParseToJson(services.GetCustomers(), writer, http.StatusOK)
 	} else {
 		web.ParseToJson(services.GetCustomerPairs(), writer, http.StatusOK)
