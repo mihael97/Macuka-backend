@@ -6,6 +6,7 @@ import (
 	"macuka-backend/src/database"
 	"macuka-backend/src/dto"
 	"macuka-backend/src/models"
+	"macuka-backend/src/util"
 	"strconv"
 	"time"
 )
@@ -30,7 +31,7 @@ func CreateTrip(tripDto dto.TripDto) (*models.Trip, error) {
 	if len(cars) == 0 {
 		return nil, errors.New(fmt.Sprintf("%s car doesn't exist", tripDto.Car))
 	}
-	date, err := time.Parse(DateFormat, tripDto.Date)
+	date, err := util.ConvertDate(tripDto.Date)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +40,7 @@ func CreateTrip(tripDto dto.TripDto) (*models.Trip, error) {
 		Start: uint(start),
 		End:   uint(end),
 		Car:   uint(carId),
-		Date:  date,
+		Date:  *date,
 	}
 	db.Create(&trip)
 	err = db.Model(&cars[0]).Association("Trips").Append([]models.Trip{trip})
@@ -54,19 +55,19 @@ func CreateTrip(tripDto dto.TripDto) (*models.Trip, error) {
 func GetTrips(idStr string, from string, to string) (interface{}, error) {
 	db := database.GetDatabase()
 	var err error
-	fromDate, err := time.Parse(DateFormat, time.Time{}.Format(DateFormat))
+	fromDate, err := util.ConvertDate(time.Time{}.Format(DateFormat))
 	if err != nil {
 		return nil, err
 	}
-	toDate, err := time.Parse(DateFormat, time.Now().Format(DateFormat))
+	toDate, err := util.ConvertDate(time.Now().Format(DateFormat))
 	if len(from) != 0 {
-		fromDate, err = time.Parse(DateFormat, from)
+		fromDate, err = util.ConvertDate(from)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if len(to) != 0 {
-		toDate, err = time.Parse(DateFormat, to)
+		toDate, err = util.ConvertDate(to)
 		if err != nil {
 			return nil, err
 		}
@@ -74,9 +75,9 @@ func GetTrips(idStr string, from string, to string) (interface{}, error) {
 	if len(idStr) == 0 {
 		var trips []models.Trip
 		if len(to) == 0 {
-			db.Where("date>=?", fromDate).Find(&trips)
+			db.Where("date>=?", *fromDate).Find(&trips)
 		} else {
-			db.Where("date>=? AND date<=?", fromDate, toDate).Find(&trips)
+			db.Where("date>=? AND date<=?", *fromDate, *toDate).Find(&trips)
 		}
 		return trips, nil
 	}
@@ -86,9 +87,9 @@ func GetTrips(idStr string, from string, to string) (interface{}, error) {
 	}
 	var trips []models.Trip
 	if len(to) == 0 {
-		db.Where("date>=? AND id=?", fromDate, id).Find(&trips)
+		db.Where("date>=? AND id=?", *fromDate, id).Find(&trips)
 	} else {
-		db.Where("date>=? AND date<=? AND id=?", fromDate, toDate, id).Find(&trips)
+		db.Where("date>=? AND date<=? AND id=?", *fromDate, *toDate, id).Find(&trips)
 	}
 	return trips[0], nil
 }
