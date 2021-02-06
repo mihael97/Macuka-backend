@@ -55,6 +55,9 @@ func GetCars(idStr string) (interface{}, error) {
 			return nil, err
 		}
 		db.Find(&cars, id)
+		if len(cars) == 0 {
+			return cars, nil
+		}
 		db.Raw("SELECT * FROM trips WHERE car=?", cars[0].Id).Find(&cars[0].Trips)
 		return cars[0], nil
 	}

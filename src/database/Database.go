@@ -45,7 +45,7 @@ func InitializeDatabase() {
 }
 
 func migrateTables() {
-	err := database.AutoMigrate(&models.Car{}, &models.Trip{}, &models.Customer{}, &models.City{}, &models.Invoice{})
+	err := database.AutoMigrate(&models.Car{}, &models.Trip{}, &models.Customer{}, &models.City{}, &models.Invoice{}, &models.User{}, &models.AppConfig{})
 	if err != nil {
 		log.Panic(err)
 	}
