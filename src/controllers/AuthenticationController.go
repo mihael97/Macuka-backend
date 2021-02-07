@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
-	"gitlab.com/mihael97/go-utility/src/web"
 	jwtPackage "macuka-backend/src/jwt"
 	"macuka-backend/src/models"
 	"macuka-backend/src/services"
@@ -27,12 +26,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&user)
 	if !services.CheckUser(user) {
 		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	configValue := services.GetConfig("EXP_TOKEN")
-
-	if configValue == nil {
-		web.WriteErrorMessage("No exp token value", w)
 		return
 	}
 
