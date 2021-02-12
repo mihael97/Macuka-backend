@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"macuka-backend/src/database"
 	"macuka-backend/src/dto"
 	"macuka-backend/src/models"
@@ -9,6 +10,7 @@ import (
 func CreateCustomer(model models.Customer) models.Customer {
 	db := database.GetDatabase()
 	db.Create(&model)
+	log.Print("Created user {}", model)
 	return model
 }
 

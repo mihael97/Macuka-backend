@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"macuka-backend/src/database"
 	"macuka-backend/src/dto"
 	"macuka-backend/src/models"
@@ -49,6 +50,7 @@ func CreateTrip(tripDto dto.TripDto) (*models.Trip, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Print("Trip {} created", trip)
 	return &trip, nil
 }
 

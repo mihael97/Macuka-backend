@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"macuka-backend/src/database"
 	"macuka-backend/src/models"
 	"strconv"
@@ -14,6 +15,7 @@ func DeleteCar(id string) error {
 	db := database.GetDatabase()
 	db.Exec("DELETE FROM trips WHERE car=?", uint(idValue))
 	db.Exec("DELETE FROM cars WHERE id=?", uint(idValue))
+	log.Print("User {} deleted", idValue)
 	return nil
 }
 
@@ -34,6 +36,7 @@ func CreateCar(params map[string]string) (*models.Car, error) {
 		Year:              uint(year),
 	}
 	db.Create(&car)
+	log.Print("Car {} created", car)
 	return &car, nil
 }
 

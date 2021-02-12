@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"macuka-backend/src/database"
 	"macuka-backend/src/dto"
 	"macuka-backend/src/models"
@@ -19,5 +20,6 @@ func CreateInvoice(invoiceDto dto.InvoiceDto) (models.Invoice, error) {
 		Date:     *date,
 	}
 	db.Create(&invoice)
+	log.Print("Added invoice {}", invoice)
 	return invoice, nil
 }
