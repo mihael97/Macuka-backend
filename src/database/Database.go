@@ -33,7 +33,7 @@ func InitializeDatabase() {
 		databasePassword = "password"
 	}
 	connectionInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+		"password=%s dbname=%s sslmode=require",
 		host, databasePort, databaseUser, databasePassword, databaseName)
 	var err error
 	database, err = gorm.Open(postgres.Open(connectionInfo), &gorm.Config{})
