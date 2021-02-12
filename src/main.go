@@ -10,6 +10,7 @@ import (
 	"macuka-backend/src/controllers"
 	"macuka-backend/src/database"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -68,5 +69,10 @@ func main() {
 	addRoute(r, controllers.GetAuthenticationRoutes())
 
 	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Print("Port is " + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
