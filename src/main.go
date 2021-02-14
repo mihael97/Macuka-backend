@@ -51,10 +51,10 @@ func ValidateMiddleware(next http.HandlerFunc) http.HandlerFunc {
 func addRoute(r *mux.Router, routes map[controllers.PathMethodPair]func(w http.ResponseWriter, r *http.Request)) {
 	for pathMethodPair, function := range routes {
 		if pathMethodPair.Path == "/cars" {
-			r.HandleFunc(pathMethodPair.Path, ValidateMiddleware(function)).Methods(pathMethodPair.GetMethod())
+			r.HandleFunc("/api"+pathMethodPair.Path, ValidateMiddleware(function)).Methods(pathMethodPair.GetMethod())
 			continue
 		}
-		r.HandleFunc(pathMethodPair.Path, function).Methods(pathMethodPair.GetMethod())
+		r.HandleFunc("/api"+pathMethodPair.Path, function).Methods(pathMethodPair.GetMethod())
 	}
 }
 

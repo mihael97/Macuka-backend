@@ -1,2 +1,3 @@
 .idea
 start-database.sh
+deploy.sh
