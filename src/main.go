@@ -6,11 +6,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"log"
 	"macuka-backend/src/controllers"
-	"macuka-backend/src/database"
+	"macuka-backend/src/services"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -59,20 +57,21 @@ func addRoute(r *mux.Router, routes map[controllers.PathMethodPair]func(w http.R
 }
 
 func main() {
-	database.InitializeDatabase()
-	r := mux.NewRouter()
-	addRoute(r, controllers.GetCarPaths())
-	addRoute(r, controllers.GetTripPaths())
-	addRoute(r, controllers.GetCustomerRoutes())
-	addRoute(r, controllers.GetCityRoutes())
-	addRoute(r, controllers.GetInvoiceRoutes())
-	addRoute(r, controllers.GetAuthenticationRoutes())
-
-	http.Handle("/", r)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Print("Port is " + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	//database.InitializeDatabase()
+	//r := mux.NewRouter()
+	//addRoute(r, controllers.GetCarPaths())
+	//addRoute(r, controllers.GetTripPaths())
+	//addRoute(r, controllers.GetCustomerRoutes())
+	//addRoute(r, controllers.GetCityRoutes())
+	//addRoute(r, controllers.GetInvoiceRoutes())
+	//addRoute(r, controllers.GetAuthenticationRoutes())
+	//
+	//http.Handle("/", r)
+	//port := os.Getenv("PORT")
+	//if port == "" {
+	//	port = "8080"
+	//}
+	//log.Print("Port is " + port)
+	//log.Fatal(http.ListenAndServe(":"+port, nil))
+	services.ExportInvoice()
 }
