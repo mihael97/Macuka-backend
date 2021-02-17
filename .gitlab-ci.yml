@@ -1,1 +1,19 @@
+image: docker:latest
+services:
+  - docker:dind
 
+variables:
+  DOCKER_DRIVER: overlay
+
+stages:
+  - build
+
+docker-build:
+  stage: build
+  script:
+    - docker build --iidfile imageid.txt -t registry.heroku.com/$APP_NAME/my-app .
+    - docker login -u _ -p $HEROKU_API_KEY registry.heroku.com
+    - docker push registry.heroku.com/$APP_NAME/my-app
+  only:
+    refs:
+      - master
