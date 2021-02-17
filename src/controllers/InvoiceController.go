@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"gitlab.com/mihael97/go-utility/src/web"
 	"macuka-backend/src/dto"
 	"macuka-backend/src/services"
@@ -16,7 +17,22 @@ func GetInvoiceRoutes() map[PathMethodPair]func(w http.ResponseWriter, r *http.R
 		Method: PostMethod,
 	}] = createInvoice
 
+	routes[PathMethodPair{
+		Path:   "/invoices/export/:id",
+		Method: GetMethod,
+	}] = exportInvoices
+
 	return routes
+}
+
+func exportInvoices(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+	name := services.ExportInvoice(mux.Vars(r)["id"], w)
+	if len(name) == 0 {
+		web.WriteErrorMessage("error during invoice exporting", w)
+		return
+	}
+	w.Header().Set("Content-Disposition", "attachment; filename="+name)
 }
 
 func createInvoice(w http.ResponseWriter, r *http.Request) {

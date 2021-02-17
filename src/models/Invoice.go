@@ -3,9 +3,11 @@ package models
 import "time"
 
 type Invoice struct {
-	Id          uint      `json:"id" ;gorm:"primaryKey;autoIncrement"`
-	Description string    `json:"description"`
-	Customer    uint      `json:"customer"`
-	Amount      float64   `json:"amount"`
-	Date        time.Time `json:"date"`
+	Id            uint      `json:"id" ;gorm:"primaryKey;autoIncrement"`
+	InvoiceNumber string    `json:"invoiceNumber" ;gorm:"unique"`
+	Customer      uint      `json:"customer"`
+	Date          time.Time `json:"date"`
+	CurrencyDate  time.Time `json:"currencyDate"`
+	CallingNumber string    `json:"callingNumber"`
+	HasVAT        bool      `json:"hasVat"`
 }
