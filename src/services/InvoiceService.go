@@ -22,6 +22,7 @@ func CreateInvoice(invoiceDto dto.InvoiceDto) (models.Invoice, error) {
 	if err != nil {
 		return models.Invoice{}, err
 	}
+
 	invoice := models.Invoice{
 		InvoiceNumber: invoiceDto.InvoiceNumber,
 		Customer:      invoiceDto.Customer,
@@ -31,6 +32,21 @@ func CreateInvoice(invoiceDto dto.InvoiceDto) (models.Invoice, error) {
 		HasVAT:        invoiceDto.HasVAT,
 	}
 	db.Create(&invoice)
+
+	invoiceItems := make([]models.InvoiceItem, 0)
+	for _, invoiceItemDto := range invoiceDto.InvoiceItems {
+		invoiceItem := models.InvoiceItem{
+			Description: invoiceItemDto.Description,
+			Quantity:    invoiceItemDto.Quantity,
+			Measure:     invoiceItemDto.Measure,
+			Invoice:     invoice.Id,
+		}
+		db.Create(&invoiceItem)
+		invoiceItems = append(invoiceItems, invoiceItem)
+	}
+	invoice.InvoiceItems = invoiceItems
+	db.Updates(&invoice)
+
 	log.Print("Added invoice {}", invoice)
 	return invoice, nil
 }
@@ -56,7 +72,7 @@ func ExportInvoice(id string, writer http.ResponseWriter) string {
 
 	db := database.GetDatabase()
 	var invoices []models.Invoice
-	db.Where("id=", id).Find(&invoices)
+	db.Where(id).Find(&invoices)
 	if len(invoices) == 0 {
 		return ""
 	}
@@ -112,7 +128,10 @@ func ExportInvoice(id string, writer http.ResponseWriter) string {
 	pdf.MultiCell(0, 30, "RAČUN R1 BROJ: "+invoice.InvoiceNumber, gofpdf.BorderNone, gofpdf.AlignLeft, false)
 	pdf.SetFont("arial", "", 10)
 	w, h := pdf.GetFontSize()
-	pdf.MultiCell(0, 1.2*h, fmt.Sprintf("DATUM I VRIJEME:%s\nMJESTO:Sveti Petar u Šumi\nVALUTA PLAĆANJA:%s\nNAČUN PLAĆANJA:TRANSAKCIJSKI RAČUN", invoice.Date, invoice.CurrencyDate), gofpdf.BorderNone, gofpdf.AlignLeft, false)
+	creationTime := invoice.Date.Format("2.1.2006")
+	currencyTime := invoice.CurrencyDate.Format("2.1.2006")
+
+	pdf.MultiCell(0, 1.2*h, fmt.Sprintf("DATUM I VRIJEME:%s\nMJESTO:Sveti Petar u Šumi\nVALUTA PLAĆANJA:%s\nNAČUN PLAĆANJA:TRANSAKCIJSKI RAČUN", creationTime, currencyTime), gofpdf.BorderNone, gofpdf.AlignLeft, false)
 
 	//Table
 	currentY := 350.
@@ -126,13 +145,39 @@ func ExportInvoice(id string, writer http.ResponseWriter) string {
 	}
 
 	pdf.SetFont("arial", "", 11)
+	_, h = pdf.GetFontSize()
 
 	//First row
-	currentY += h
-	for i := 0; i < len(locations)-1; i++ {
-		pdf.MoveTo(locations[i], currentY)
-		pdf.MultiCell(0, 0, "a", gofpdf.AlignMiddle, gofpdf.AlignMiddle, false)
+	var invoiceItems []models.InvoiceItem
+	db.Raw("SELECT * FROM invoice_items WHERE invoice=?", invoice.Id).Find(&invoiceItems)
+	for index, item := range invoiceItems {
+		if index != 0 {
+			pdf.Line(0.05*pageWidth, currentY+h/2, 0.95*pageWidth, currentY+h/2)
+		}
+
+		currentY += h
+
+		for locationIndex := 0; locationIndex < len(locations)-1; locationIndex++ {
+			pdf.MoveTo(locations[locationIndex], currentY)
+			text := ""
+			switch locationIndex {
+			case 0:
+				text = strconv.Itoa(index)
+			case 1:
+				text = item.Description
+			case 2:
+				text = item.Measure
+			case 3:
+				text = fmt.Sprintf("%.2f", item.Quantity)
+			case 4:
+				text = fmt.Sprintf("%.2f", item.Price)
+			case 5:
+				text = fmt.Sprintf("%.2f", item.Quantity*item.Price)
+			}
+			pdf.MultiCell(0, 0, text, gofpdf.AlignMiddle, gofpdf.AlignMiddle, false)
+		}
 	}
+
 	currentY += h
 	pdf.Line(0.05*pageWidth, currentY, 0.95*pageWidth, currentY)
 

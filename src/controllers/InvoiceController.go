@@ -18,7 +18,7 @@ func GetInvoiceRoutes() map[PathMethodPair]func(w http.ResponseWriter, r *http.R
 	}] = createInvoice
 
 	routes[PathMethodPair{
-		Path:   "/invoices/export/:id",
+		Path:   "/invoices/export/{id}",
 		Method: GetMethod,
 	}] = exportInvoices
 
