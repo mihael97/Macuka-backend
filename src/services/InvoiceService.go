@@ -1,6 +1,8 @@
 package services
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -50,12 +52,12 @@ func CreateInvoice(invoiceDto dto.InvoiceDto) (models.Invoice, error) {
 	return invoice, nil
 }
 
-func ExportInvoice(id string, writer http.ResponseWriter) http.Header {
+func ExportInvoice(id string, writer http.ResponseWriter) (bool, error) {
 	db := database.GetDatabase()
 	var invoices []models.Invoice
 	db.Where(id).Find(&invoices)
 	if len(invoices) == 0 {
-		return nil
+		return false, nil
 	}
 
 	invoice := invoices[0]
@@ -73,14 +75,38 @@ func ExportInvoice(id string, writer http.ResponseWriter) http.Header {
 	db.Raw("SELECT * FROM invoice_items WHERE invoice=?", invoice.Id).Find(&invoiceItems)
 	data["invoiceItems"] = invoiceItems
 
-	request, err := http.Get(fmt.Sprintf("%s/templates/generate", util.GetEnvVariable("DOCUMENT_API_URL", "https://document-creator.herokuapp.com")))
+	body := &bytes.Buffer{}
+	jsonContent := make(map[string]interface{}, 0)
+	jsonContent["data"] = data
+	jsonContent["type"] = "docx"
+	jsonContent["name"] = "template"
+	content, err := json.Marshal(jsonContent)
+	fmt.Println(string(content))
 	if err != nil {
-		return nil
+		return false, err
 	}
-	content, err := ioutil.ReadAll(request.Body)
+	body.Write(content)
+
+	request, err := http.NewRequest("GET", fmt.Sprintf("%s/templates/generate", util.GetEnvVariable("DOCUMENT_API_URL", "https://document-creator.herokuapp.com")), body)
 	if err != nil {
-		return nil
+		return false, err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	client := http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if response.StatusCode != 200 {
+		return false, err
+	}
+	content, err = ioutil.ReadAll(response.Body)
+	if err != nil {
+		return false, err
 	}
 	writer.Write(content)
-	return request.Header
+	writer.Header().Set("Content-Disposition", response.Header.Get("Content-Disposition"))
+	writer.Header().Set("Content-Type", response.Header.Get("Content-Type"))
+	writer.Header().Set("Content-Length", response.Header.Get("Content-Length"))
+	return true, nil
 }

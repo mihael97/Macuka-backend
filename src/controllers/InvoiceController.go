@@ -26,13 +26,12 @@ func GetInvoiceRoutes() map[PathMethodPair]func(w http.ResponseWriter, r *http.R
 }
 
 func exportInvoices(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
-	header := services.ExportInvoice(mux.Vars(r)["id"], w)
-	if header == nil {
+	success, err := services.ExportInvoice(mux.Vars(r)["id"], w)
+	if err != nil {
+		web.WriteError(err, w)
+	} else if !success {
 		web.WriteErrorMessage("error during invoice exporting", w)
-		return
 	}
-	w.Header().Set("Content-Disposition", header.Get("Content-Disposition"))
 }
 
 func createInvoice(w http.ResponseWriter, r *http.Request) {

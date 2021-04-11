@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"log"
 	"macuka-backend/src/controllers"
 	"macuka-backend/src/database"
+	"macuka-backend/src/dto"
+	"macuka-backend/src/util"
 	"net/http"
 	"os"
 	"strings"
@@ -58,8 +63,42 @@ func addRoute(r *mux.Router, routes map[controllers.PathMethodPair]func(w http.R
 	}
 }
 
+func initializeTemplate() {
+	path := util.GetEnvVariable("DOCUMENT_API_URL", "https://document-creator.herokuapp.com") + "/documents"
+	file, err := ioutil.ReadFile("proba.xml")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	body := &bytes.Buffer{}
+	content, err := json.Marshal(dto.DocumentDto{
+		Name:    "template",
+		Content: base64.StdEncoding.EncodeToString(file),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	body.Write(content)
+	request, err := http.NewRequest("POST", path, body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+	client := &http.Client{}
+
+	response, err := client.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print(response.StatusCode)
+}
+
 func main() {
 	database.InitializeDatabase()
+	initializeTemplate()
 	r := mux.NewRouter()
 	addRoute(r, controllers.GetCarPaths())
 	addRoute(r, controllers.GetTripPaths())
