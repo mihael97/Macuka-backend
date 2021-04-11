@@ -11,6 +11,7 @@ import (
 	"macuka-backend/src/models"
 	"macuka-backend/src/util"
 	"net/http"
+	"os"
 )
 
 func CreateInvoice(invoiceDto dto.InvoiceDto) (models.Invoice, error) {
@@ -79,7 +80,11 @@ func ExportInvoice(id string, writer http.ResponseWriter) (bool, error) {
 	jsonContent := make(map[string]interface{}, 0)
 	jsonContent["data"] = data
 	jsonContent["type"] = "docx"
-	jsonContent["name"] = "template"
+	templateName := os.Getenv("TEMPLATE_NAME")
+	if len(templateName) == 0 {
+		templateName = "template"
+	}
+	jsonContent["name"] = templateName
 	content, err := json.Marshal(jsonContent)
 	fmt.Println(string(content))
 	if err != nil {

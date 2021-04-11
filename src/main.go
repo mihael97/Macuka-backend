@@ -65,6 +65,11 @@ func addRoute(r *mux.Router, routes map[controllers.PathMethodPair]func(w http.R
 
 func initializeTemplate() {
 	path := util.GetEnvVariable("DOCUMENT_API_URL", "https://document-creator.herokuapp.com") + "/documents"
+
+	if strings.Contains(path, "localhost") {
+		return
+	}
+
 	file, err := ioutil.ReadFile("proba.xml")
 
 	if err != nil {
